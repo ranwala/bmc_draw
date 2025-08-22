@@ -104,7 +104,9 @@ def save_card(i, team_name):
         json.dump({"numbers": numbers, "revealed": revealed, "team_names": team_names}, f)
     st.rerun()
 
-# Display cards in 2 rows of 4
+import pandas as pd
+
+# --- Existing card display loop ---
 for row in range(2):
     cols = st.columns(4)
     for col in range(4):
@@ -123,7 +125,7 @@ for row in range(2):
                 flipped_class = "card revealed" if revealed[i] else "card"
                 card_content = f"{numbers[i]}<br><small>{team_names[i]}</small>" if revealed[i] else ""
 
-                # Front: show logo, Back: show number + team name
+                # Front: logo, Back: number + team name
                 st.markdown(f"""
                 <div style="display: flex; justify-content: center;">
                     <div class="card-container">
@@ -136,3 +138,60 @@ for row in range(2):
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+import pandas as pd
+
+# --- Show Match Groups (existing code from earlier) ---
+st.markdown("<h2 style='text-align:center;'>Table</h2>", unsafe_allow_html=True)
+
+group_a = []
+group_b = []
+
+for i, num in enumerate(numbers):
+    if revealed[i]:
+        entry = f"{team_names[i]}"
+    else:
+        entry = f"TBD"
+    if num in [1, 2, 3, 4]:
+        group_a.append(entry)
+    else:
+        group_b.append(entry)
+
+df_groups = pd.DataFrame({
+    "Group A (1-4)": group_a,
+    "Group B (5-8)": group_b
+})
+
+st.table(df_groups.style.hide(axis="index"))
+
+# --- NEW: Show Match Schedule ---
+st.markdown("<h2 style='text-align:center;'>Match Schedule</h2>", unsafe_allow_html=True)
+
+# Load your schedule CSV
+schedule = pd.read_csv("files/bmc_2025.csv")
+
+# Map placeholders Team A..H -> entered team names
+mapping = {
+    "Team A": team_names[numbers.index(1)] if revealed[numbers.index(1)] else "TBD",
+    "Team B": team_names[numbers.index(2)] if revealed[numbers.index(2)] else "TBD",
+    "Team C": team_names[numbers.index(3)] if revealed[numbers.index(3)] else "TBD",
+    "Team D": team_names[numbers.index(4)] if revealed[numbers.index(4)] else "TBD",
+    "Team E": team_names[numbers.index(5)] if revealed[numbers.index(5)] else "TBD",
+    "Team F": team_names[numbers.index(6)] if revealed[numbers.index(6)] else "TBD",
+    "Team G": team_names[numbers.index(7)] if revealed[numbers.index(7)] else "TBD",
+    "Team H": team_names[numbers.index(8)] if revealed[numbers.index(8)] else "TBD",
+}
+
+# Replace placeholders with actual team names
+def replace_teams(cell):
+    if isinstance(cell, str):
+        for placeholder, real_team in mapping.items():
+            cell = cell.replace(placeholder, real_team)
+    return cell
+
+schedule_updated = schedule.applymap(replace_teams)
+
+# Show schedule (hide index)
+st.table(schedule_updated.style.hide(axis="index"))
+
+
