@@ -115,7 +115,7 @@ for row in range(2):
             with st.form(key=f"form_{i}"):
                 # Always show input + button
                 team_name = st.text_input("Enter team name", value=team_names[i], key=f"name_{i}")
-                tap = st.form_submit_button("Tap here")
+                tap = st.form_submit_button("Submit")
                 if tap and team_name.strip():
                     save_card(i, team_name.strip())
 
@@ -125,12 +125,14 @@ for row in range(2):
 
                 # Front: show logo, Back: show number + team name
                 st.markdown(f"""
-                <div class="card-container">
-                    <div class="{flipped_class}">
-                        <div class="card-face card-front">
-                            <img src="data:image/png;base64,{image_base64}" width="60">
+                <div style="display: flex; justify-content: center;">
+                    <div class="card-container">
+                        <div class="{flipped_class}">
+                            <div class="card-face card-front">
+                                <img src="data:image/png;base64,{image_base64}" width="60">
+                            </div>
+                            <div class="card-face card-back">{card_content}</div>
                         </div>
-                        <div class="card-face card-back">{card_content}</div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
